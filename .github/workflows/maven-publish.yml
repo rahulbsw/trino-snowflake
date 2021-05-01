@@ -31,5 +31,4 @@ jobs:
     - name: Publish to GitHub 
       uses: actions/upload-artifact@v2
       with:	
-        name: ${{ env.name }}-name	
         path: ${{ github.workspace }}/artifact/**/*.zip
