@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      packages: write
+      repository-projects: write
 
     steps:
     - uses: actions/checkout@v2
@@ -28,7 +28,8 @@ jobs:
     - name: Build with Maven
       run: mvn -B package --file pom.xml
 
-    - name: Publish to GitHub Packages Apache Maven
-      run: mvn deploy -s $GITHUB_WORKSPACE/settings.xml
-      env:
-        GITHUB_TOKEN: ${{ github.token }}
+    - name: Publish to GitHub 
+    - uses: actions/upload-artifact@v2
+      with:	
+        name: ${{ env.name }}-name	
+        path: ${{ github.workspace }}/artifact/**/*.zip
