@@ -1,2 +1,2 @@
-# presto-snowflake
-Presto Snowflake Connector
+# trino-snowflake
+Trino Snowflake Connector
