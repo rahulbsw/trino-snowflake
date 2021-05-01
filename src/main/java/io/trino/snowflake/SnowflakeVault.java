@@ -11,7 +11,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.presto.snowflake;
+package io.trino.snowflake;
 
 import com.bettercloud.vault.Vault;
 import com.bettercloud.vault.VaultConfig;

@@ -11,10 +11,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.presto.snowflake;
+package io.trino.snowflake;
 
-import io.prestosql.plugin.jdbc.JdbcPlugin;
-import io.prestosql.spi.Plugin;
+import io.trino.plugin.jdbc.JdbcPlugin;
+import io.trino.spi.Plugin;
 
 public class SnowflakePlugin
         extends JdbcPlugin implements Plugin

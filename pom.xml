@@ -4,32 +4,32 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>io.prestosql</groupId>
-        <artifactId>presto-root</artifactId>
-        <version>350</version>
+        <groupId>io.trino</groupId>
+        <artifactId>trino-root</artifactId>
+        <version>356</version>
     </parent>
 
-    <groupId>io.prestosql</groupId>
-    <artifactId>presto-snowflake</artifactId>
-    <version>350</version>
-    <description>Presto Snowflake Connector</description>
+    <groupId>io.trino</groupId>
+    <artifactId>trino-snowflake</artifactId>
+    <version>356</version>
+    <description>Trino Snowflake Connector</description>
     <!--    <packaging>jar</packaging>-->
-    <packaging>presto-plugin</packaging>
+    <packaging>trino-plugin</packaging>
 
     <properties>
         <air.main.basedir>${project.basedir}</air.main.basedir>
-        <dep.log4j.version>[2.13.2,)</dep.log4j.version>
+        <dep.log4j.version>2.14.1</dep.log4j.version>
     </properties>
 
     <dependencies>
         <dependency>
-            <groupId>io.prestosql</groupId>
-            <artifactId>presto-base-jdbc</artifactId>
+            <groupId>io.trino</groupId>
+            <artifactId>trino-base-jdbc</artifactId>
         </dependency>
 
         <dependency>
-            <groupId>io.prestosql</groupId>
-            <artifactId>presto-plugin-toolkit</artifactId>
+            <groupId>io.trino</groupId>
+            <artifactId>trino-plugin-toolkit</artifactId>
         </dependency>
 
         <dependency>
@@ -71,7 +71,7 @@
         <dependency>
             <groupId>net.snowflake</groupId>
             <artifactId>snowflake-jdbc</artifactId>
-            <version>3.11.0</version>
+            <version>3.13.3</version>
         </dependency>
 
        <!-- used by tests but also needed transitively -->
@@ -95,10 +95,10 @@
             <scope>runtime</scope>
         </dependency>
 
-        <!-- Presto SPI -->
+        <!-- trino SPI -->
         <dependency>
-            <groupId>io.prestosql</groupId>
-            <artifactId>presto-spi</artifactId>
+            <groupId>io.trino</groupId>
+            <artifactId>trino-spi</artifactId>
             <scope>provided</scope>
         </dependency>
 
@@ -122,31 +122,31 @@
 
 
         <dependency>
-            <groupId>io.prestosql</groupId>
-            <artifactId>presto-client</artifactId>
+            <groupId>io.trino</groupId>
+            <artifactId>trino-client</artifactId>
             <scope>test</scope>
         </dependency>
 
         <dependency>
-            <groupId>io.prestosql</groupId>
-            <artifactId>presto-main</artifactId>
+            <groupId>io.trino</groupId>
+            <artifactId>trino-main</artifactId>
             <scope>test</scope>
         </dependency>
 
         <dependency>
-            <groupId>io.prestosql</groupId>
-            <artifactId>presto-testing</artifactId>
+            <groupId>io.trino</groupId>
+            <artifactId>trino-testing</artifactId>
             <scope>test</scope>
         </dependency>
 
         <dependency>
-            <groupId>io.prestosql</groupId>
-            <artifactId>presto-tpch</artifactId>
+            <groupId>io.trino</groupId>
+            <artifactId>trino-tpch</artifactId>
             <scope>test</scope>
         </dependency>
 
         <dependency>
-            <groupId>io.prestosql.tpch</groupId>
+            <groupId>io.trino.tpch</groupId>
             <artifactId>tpch</artifactId>
             <scope>test</scope>
         </dependency>
@@ -193,31 +193,31 @@
     <build>
 
         <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.0.0-M4</version>
-                <configuration>
-                    <!-- integration tests take a very long time so only run them in the CI server -->
-                    <excludes>
-                        <exclude>**/TestMySqlDistributedQueries.java</exclude>
-                    </excludes>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>io.prestosql</groupId>
-                <artifactId>presto-maven-plugin</artifactId>
-                <version>8</version>
-                <extensions>true</extensions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <source>8</source>
-                    <target>8</target>
-                </configuration>
-            </plugin>
+<!--            <plugin>-->
+<!--                <groupId>org.apache.maven.plugins</groupId>-->
+<!--                <artifactId>maven-surefire-plugin</artifactId>-->
+<!--                <version>3.0.0-M4</version>-->
+<!--                <configuration>-->
+<!--                    &lt;!&ndash; integration tests take a very long time so only run them in the CI server &ndash;&gt;-->
+<!--                    <excludes>-->
+<!--                        <exclude>**/TestSnowFlakeDistributedQueries.java</exclude>-->
+<!--                    </excludes>-->
+<!--                </configuration>-->
+<!--            </plugin>-->
+<!--            <plugin>-->
+<!--                <groupId>io.trino</groupId>-->
+<!--                <artifactId>trino-maven-plugin</artifactId>-->
+<!--                <version>10</version>-->
+<!--                <extensions>true</extensions>-->
+<!--            </plugin>-->
+<!--            <plugin>-->
+<!--                <groupId>org.apache.maven.plugins</groupId>-->
+<!--                <artifactId>maven-compiler-plugin</artifactId>-->
+<!--                <configuration>-->
+<!--                    <source>8</source>-->
+<!--                    <target>8</target>-->
+<!--                </configuration>-->
+<!--            </plugin>-->
         </plugins>
     </build>
 

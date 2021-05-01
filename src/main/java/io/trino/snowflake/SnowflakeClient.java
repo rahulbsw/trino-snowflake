@@ -11,36 +11,36 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.presto.snowflake;
+package io.trino.snowflake;
 
 import com.google.common.collect.ImmutableSet;
-import io.prestosql.plugin.jdbc.BaseJdbcClient;
-import io.prestosql.plugin.jdbc.BaseJdbcConfig;
-import io.prestosql.plugin.jdbc.ColumnMapping;
-import io.prestosql.plugin.jdbc.ConnectionFactory;
-import io.prestosql.plugin.jdbc.JdbcExpression;
-import io.prestosql.plugin.jdbc.JdbcTypeHandle;
-import io.prestosql.plugin.jdbc.PredicatePushdownController;
-import io.prestosql.plugin.jdbc.WriteMapping;
-import io.prestosql.plugin.jdbc.expression.AggregateFunctionRewriter;
-import io.prestosql.plugin.jdbc.expression.AggregateFunctionRule;
-import io.prestosql.plugin.jdbc.expression.ImplementAvgDecimal;
-import io.prestosql.plugin.jdbc.expression.ImplementAvgFloatingPoint;
-import io.prestosql.plugin.jdbc.expression.ImplementCount;
-import io.prestosql.plugin.jdbc.expression.ImplementCountAll;
-import io.prestosql.plugin.jdbc.expression.ImplementMinMax;
-import io.prestosql.plugin.jdbc.expression.ImplementSum;
-import io.prestosql.spi.PrestoException;
-import io.prestosql.spi.connector.AggregateFunction;
-import io.prestosql.spi.connector.ColumnHandle;
-import io.prestosql.spi.connector.ConnectorSession;
-import io.prestosql.spi.type.DecimalType;
-import io.prestosql.spi.type.Decimals;
-import io.prestosql.spi.type.StandardTypes;
-import io.prestosql.spi.type.Type;
-import io.prestosql.spi.type.TypeManager;
-import io.prestosql.spi.type.TypeSignature;
-import io.prestosql.spi.type.VarcharType;
+import io.trino.plugin.jdbc.BaseJdbcClient;
+import io.trino.plugin.jdbc.BaseJdbcConfig;
+import io.trino.plugin.jdbc.ColumnMapping;
+import io.trino.plugin.jdbc.ConnectionFactory;
+import io.trino.plugin.jdbc.JdbcExpression;
+import io.trino.plugin.jdbc.JdbcTypeHandle;
+import io.trino.plugin.jdbc.WriteMapping;
+import io.trino.plugin.jdbc.expression.AggregateFunctionRewriter;
+import io.trino.plugin.jdbc.expression.AggregateFunctionRule;
+import io.trino.plugin.jdbc.expression.ImplementAvgDecimal;
+import io.trino.plugin.jdbc.expression.ImplementAvgFloatingPoint;
+import io.trino.plugin.jdbc.expression.ImplementCount;
+import io.trino.plugin.jdbc.expression.ImplementCountAll;
+import io.trino.plugin.jdbc.expression.ImplementMinMax;
+import io.trino.plugin.jdbc.expression.ImplementSum;
+import io.trino.spi.TrinoException;
+import io.trino.spi.connector.AggregateFunction;
+import io.trino.spi.connector.ColumnHandle;
+import io.trino.spi.connector.ConnectorSession;
+import io.trino.spi.type.CharType;
+import io.trino.spi.type.DecimalType;
+import io.trino.spi.type.Decimals;
+import io.trino.spi.type.StandardTypes;
+import io.trino.spi.type.Type;
+import io.trino.spi.type.TypeManager;
+import io.trino.spi.type.TypeSignature;
+import io.trino.spi.type.VarcharType;
 
 import javax.inject.Inject;
 
@@ -53,41 +53,54 @@ import java.util.function.BiFunction;
 
 import static com.google.common.util.concurrent.MoreExecutors.directExecutor;
 import static io.airlift.slice.Slices.utf8Slice;
-import static io.prestosql.plugin.base.util.JsonTypeUtil.jsonParse;
-import static io.prestosql.plugin.jdbc.DecimalConfig.DecimalMapping.ALLOW_OVERFLOW;
-import static io.prestosql.plugin.jdbc.DecimalSessionSessionProperties.getDecimalDefaultScale;
-import static io.prestosql.plugin.jdbc.DecimalSessionSessionProperties.getDecimalRounding;
-import static io.prestosql.plugin.jdbc.DecimalSessionSessionProperties.getDecimalRoundingMode;
-import static io.prestosql.plugin.jdbc.JdbcErrorCode.JDBC_ERROR;
-import static io.prestosql.plugin.jdbc.PredicatePushdownController.DISABLE_PUSHDOWN;
-import static io.prestosql.plugin.jdbc.PredicatePushdownController.FULL_PUSHDOWN;
-import static io.prestosql.plugin.jdbc.PredicatePushdownController.PUSHDOWN_AND_KEEP;
-import static io.prestosql.plugin.jdbc.StandardColumnMappings.bigintColumnMapping;
-import static io.prestosql.plugin.jdbc.StandardColumnMappings.dateColumnMapping;
-import static io.prestosql.plugin.jdbc.StandardColumnMappings.decimalColumnMapping;
-import static io.prestosql.plugin.jdbc.StandardColumnMappings.defaultCharColumnMapping;
-import static io.prestosql.plugin.jdbc.StandardColumnMappings.doubleColumnMapping;
-import static io.prestosql.plugin.jdbc.StandardColumnMappings.integerColumnMapping;
-import static io.prestosql.plugin.jdbc.StandardColumnMappings.realColumnMapping;
-import static io.prestosql.plugin.jdbc.StandardColumnMappings.realWriteFunction;
-import static io.prestosql.plugin.jdbc.StandardColumnMappings.smallintColumnMapping;
-import static io.prestosql.plugin.jdbc.StandardColumnMappings.timestampWriteFunction;
-import static io.prestosql.plugin.jdbc.StandardColumnMappings.tinyintColumnMapping;
-import static io.prestosql.plugin.jdbc.StandardColumnMappings.varbinaryReadFunction;
-import static io.prestosql.plugin.jdbc.StandardColumnMappings.varbinaryWriteFunction;
-import static io.prestosql.plugin.jdbc.StandardColumnMappings.varcharReadFunction;
-import static io.prestosql.plugin.jdbc.StandardColumnMappings.varcharWriteFunction;
-import static io.prestosql.spi.StandardErrorCode.NOT_SUPPORTED;
-import static io.prestosql.spi.type.DecimalType.createDecimalType;
-import static io.prestosql.spi.type.RealType.REAL;
-import static io.prestosql.spi.type.TimeWithTimeZoneType.TIME_WITH_TIME_ZONE;
-import static io.prestosql.spi.type.TimestampType.TIMESTAMP_MILLIS;
-import static io.prestosql.spi.type.TimestampWithTimeZoneType.TIMESTAMP_TZ_MILLIS;
-import static io.prestosql.spi.type.VarbinaryType.VARBINARY;
-import static io.prestosql.spi.type.VarcharType.createUnboundedVarcharType;
-import static io.prestosql.spi.type.VarcharType.createVarcharType;
+import static io.trino.plugin.base.util.JsonTypeUtil.jsonParse;
+import static io.trino.plugin.jdbc.DecimalConfig.DecimalMapping.ALLOW_OVERFLOW;
+import static io.trino.plugin.jdbc.DecimalSessionSessionProperties.getDecimalDefaultScale;
+import static io.trino.plugin.jdbc.DecimalSessionSessionProperties.getDecimalRounding;
+import static io.trino.plugin.jdbc.DecimalSessionSessionProperties.getDecimalRoundingMode;
+import static io.trino.plugin.jdbc.JdbcErrorCode.JDBC_ERROR;
+import static io.trino.plugin.jdbc.PredicatePushdownController.DISABLE_PUSHDOWN;
+import static io.trino.plugin.jdbc.PredicatePushdownController.FULL_PUSHDOWN;
+import static io.trino.plugin.jdbc.StandardColumnMappings.bigintColumnMapping;
+import static io.trino.plugin.jdbc.StandardColumnMappings.bigintWriteFunction;
+import static io.trino.plugin.jdbc.StandardColumnMappings.charWriteFunction;
+import static io.trino.plugin.jdbc.StandardColumnMappings.dateColumnMapping;
+import static io.trino.plugin.jdbc.StandardColumnMappings.dateWriteFunction;
+import static io.trino.plugin.jdbc.StandardColumnMappings.decimalColumnMapping;
+import static io.trino.plugin.jdbc.StandardColumnMappings.defaultCharColumnMapping;
+import static io.trino.plugin.jdbc.StandardColumnMappings.defaultVarcharColumnMapping;
+import static io.trino.plugin.jdbc.StandardColumnMappings.doubleColumnMapping;
+import static io.trino.plugin.jdbc.StandardColumnMappings.doubleWriteFunction;
+import static io.trino.plugin.jdbc.StandardColumnMappings.integerColumnMapping;
+import static io.trino.plugin.jdbc.StandardColumnMappings.integerWriteFunction;
+import static io.trino.plugin.jdbc.StandardColumnMappings.longDecimalWriteFunction;
+import static io.trino.plugin.jdbc.StandardColumnMappings.realColumnMapping;
+import static io.trino.plugin.jdbc.StandardColumnMappings.realWriteFunction;
+import static io.trino.plugin.jdbc.StandardColumnMappings.shortDecimalWriteFunction;
+import static io.trino.plugin.jdbc.StandardColumnMappings.smallintColumnMapping;
+import static io.trino.plugin.jdbc.StandardColumnMappings.smallintWriteFunction;
+import static io.trino.plugin.jdbc.StandardColumnMappings.timestampWriteFunction;
+import static io.trino.plugin.jdbc.StandardColumnMappings.tinyintColumnMapping;
+import static io.trino.plugin.jdbc.StandardColumnMappings.tinyintWriteFunction;
+import static io.trino.plugin.jdbc.StandardColumnMappings.varbinaryReadFunction;
+import static io.trino.plugin.jdbc.StandardColumnMappings.varbinaryWriteFunction;
+import static io.trino.plugin.jdbc.StandardColumnMappings.varcharWriteFunction;
+import static io.trino.spi.StandardErrorCode.NOT_SUPPORTED;
+import static io.trino.spi.type.BigintType.BIGINT;
+import static io.trino.spi.type.DateType.DATE;
+import static io.trino.spi.type.DecimalType.createDecimalType;
+import static io.trino.spi.type.DoubleType.DOUBLE;
+import static io.trino.spi.type.IntegerType.INTEGER;
+import static io.trino.spi.type.RealType.REAL;
+import static io.trino.spi.type.SmallintType.SMALLINT;
+import static io.trino.spi.type.TimeWithTimeZoneType.TIME_WITH_TIME_ZONE;
+import static io.trino.spi.type.TimestampType.TIMESTAMP_MILLIS;
+import static io.trino.spi.type.TimestampWithTimeZoneType.TIMESTAMP_TZ_MILLIS;
+import static io.trino.spi.type.TinyintType.TINYINT;
+import static io.trino.spi.type.VarbinaryType.VARBINARY;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
+import static java.lang.String.format;
 
 public class SnowflakeClient
         extends BaseJdbcClient
@@ -125,10 +138,10 @@ public class SnowflakeClient
     }
 
     @Override
-    public Optional<ColumnMapping> toPrestoType(ConnectorSession session, Connection connection, JdbcTypeHandle typeHandle)
+    public Optional<ColumnMapping> toColumnMapping(ConnectorSession session, Connection connection, JdbcTypeHandle typeHandle)
     {
         String jdbcTypeName = typeHandle.getJdbcTypeName()
-                .orElseThrow(() -> new PrestoException(JDBC_ERROR, "Type name is missing: " + typeHandle));
+                .orElseThrow(() -> new TrinoException(JDBC_ERROR, "Type name is missing: " + typeHandle));
 
         Optional<ColumnMapping> mapping = getForcedMappingToVarchar(typeHandle);
         if (mapping.isPresent()) {
@@ -169,6 +182,7 @@ public class SnowflakeClient
                     int scale = min(decimalDigits, getDecimalDefaultScale(session));
                     return Optional.of(decimalColumnMapping(createDecimalType(Decimals.MAX_PRECISION, scale), getDecimalRoundingMode(session)));
                 }
+                // TODO does mysql support negative scale?
                 precision = precision + max(-decimalDigits, 0); // Map decimal(p, -s) (negative scale) to decimal(p+s, 0).
                 if (precision > Decimals.MAX_PRECISION) {
                     break;
@@ -176,18 +190,14 @@ public class SnowflakeClient
                 return Optional.of(decimalColumnMapping(createDecimalType(precision, max(decimalDigits, 0))));
 
             case Types.CHAR:
-                return Optional.of(defaultCharColumnMapping(typeHandle.getRequiredColumnSize()));
+                return Optional.of(defaultCharColumnMapping(typeHandle.getRequiredColumnSize(), false));
 
             // TODO not all these type constants are necessarily used by the JDBC driver
             case Types.VARCHAR:
             case Types.NVARCHAR:
             case Types.LONGVARCHAR:
             case Types.LONGNVARCHAR:
-                int varcharLength = typeHandle.getRequiredColumnSize();
-                VarcharType varcharType = (varcharLength <= VarcharType.MAX_LENGTH) ? createVarcharType(varcharLength) : createUnboundedVarcharType();
-                // Remote database can be case insensitive.
-                PredicatePushdownController predicatePushdownController = PUSHDOWN_AND_KEEP;
-                return Optional.of(ColumnMapping.sliceMapping(varcharType, varcharReadFunction(varcharType), varcharWriteFunction(), predicatePushdownController));
+                return Optional.of(defaultVarcharColumnMapping(typeHandle.getRequiredColumnSize(), false));
 
             case Types.BINARY:
             case Types.VARBINARY:
@@ -196,6 +206,10 @@ public class SnowflakeClient
 
             case Types.DATE:
                 return Optional.of(dateColumnMapping());
+
+            case Types.TIMESTAMP:
+                // TODO support higher precisions (https://github.com/trinodb/trino/issues/6910)
+                break; // currently handled by the default mappings
         }
 
         // TODO add explicit mappings
@@ -203,32 +217,55 @@ public class SnowflakeClient
     }
 
     @Override
-    public Optional<JdbcExpression> implementAggregation(ConnectorSession session, AggregateFunction aggregate, Map<String, ColumnHandle> assignments)
-    {
-        // TODO support complex ConnectorExpressions
-        return aggregateFunctionRewriter.rewrite(session, aggregate, assignments);
-    }
-
-    private static Optional<JdbcTypeHandle> toTypeHandle(DecimalType decimalType)
-    {
-        return Optional.of(new JdbcTypeHandle(Types.NUMERIC, Optional.of("decimal"), Optional.of(decimalType.getPrecision()), Optional.of(decimalType.getScale()), Optional.empty(), Optional.empty()));
-    }
-
-    @Override
     public WriteMapping toWriteMapping(ConnectorSession session, Type type)
     {
-        if (REAL.equals(type)) {
+        if (type == TINYINT) {
+            return WriteMapping.longMapping("tinyint", tinyintWriteFunction());
+        }
+        if (type == SMALLINT) {
+            return WriteMapping.longMapping("smallint", smallintWriteFunction());
+        }
+        if (type == INTEGER) {
+            return WriteMapping.longMapping("integer", integerWriteFunction());
+        }
+        if (type == BIGINT) {
+            return WriteMapping.longMapping("bigint", bigintWriteFunction());
+        }
+        if (type == REAL) {
             return WriteMapping.longMapping("float", realWriteFunction());
         }
+        if (type == DOUBLE) {
+            return WriteMapping.doubleMapping("double precision", doubleWriteFunction());
+        }
+
+        if (type instanceof DecimalType) {
+            DecimalType decimalType = (DecimalType) type;
+            String dataType = format("decimal(%s, %s)", decimalType.getPrecision(), decimalType.getScale());
+            if (decimalType.isShort()) {
+                return WriteMapping.longMapping(dataType, shortDecimalWriteFunction(decimalType));
+            }
+            return WriteMapping.sliceMapping(dataType, longDecimalWriteFunction(decimalType));
+        }
+
+        if (type == DATE) {
+            return WriteMapping.longMapping("date", dateWriteFunction());
+        }
+
         if (TIME_WITH_TIME_ZONE.equals(type) || TIMESTAMP_TZ_MILLIS.equals(type)) {
-            throw new PrestoException(NOT_SUPPORTED, "Unsupported column type: " + type.getDisplayName());
+            throw new TrinoException(NOT_SUPPORTED, "Unsupported column type: " + type.getDisplayName());
         }
         if (TIMESTAMP_MILLIS.equals(type)) {
-            return WriteMapping.longMapping("datetime", timestampWriteFunction(TIMESTAMP_MILLIS));
+            // TODO use `timestampWriteFunction` (https://github.com/trinodb/trino/issues/6910)
+            return WriteMapping.longMapping("datetime(3)", timestampWriteFunction(TIMESTAMP_MILLIS));
         }
         if (VARBINARY.equals(type)) {
             return WriteMapping.sliceMapping("mediumblob", varbinaryWriteFunction());
         }
+
+        if (type instanceof CharType) {
+            return WriteMapping.sliceMapping("char(" + ((CharType) type).getLength() + ")", charWriteFunction());
+        }
+
         if (type instanceof VarcharType) {
             VarcharType varcharType = (VarcharType) type;
             String dataType;
@@ -249,11 +286,24 @@ public class SnowflakeClient
             }
             return WriteMapping.sliceMapping(dataType, varcharWriteFunction());
         }
+
         if (type.equals(jsonType)) {
             return WriteMapping.sliceMapping("json", varcharWriteFunction());
         }
 
         return legacyToWriteMapping(session, type);
+    }
+
+    @Override
+    public Optional<JdbcExpression> implementAggregation(ConnectorSession session, AggregateFunction aggregate, Map<String, ColumnHandle> assignments)
+    {
+        // TODO support complex ConnectorExpressions
+        return aggregateFunctionRewriter.rewrite(session, aggregate, assignments);
+    }
+
+    private static Optional<JdbcTypeHandle> toTypeHandle(DecimalType decimalType)
+    {
+        return Optional.of(new JdbcTypeHandle(Types.NUMERIC, Optional.of("decimal"), Optional.of(decimalType.getPrecision()), Optional.of(decimalType.getScale()), Optional.empty(), Optional.empty()));
     }
 
     @Override
