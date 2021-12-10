@@ -18,7 +18,7 @@
 
     <properties>
         <air.main.basedir>${project.basedir}</air.main.basedir>
-        <dep.log4j.version>2.14.1</dep.log4j.version>
+        <dep.log4j.version>2.15.0</dep.log4j.version>
     </properties>
 
     <dependencies>
