@@ -71,7 +71,7 @@
         <dependency>
             <groupId>net.snowflake</groupId>
             <artifactId>snowflake-jdbc</artifactId>
-            <version>3.13.3</version>
+            <version>3.13.29</version>
         </dependency>
 
        <!-- used by tests but also needed transitively -->
